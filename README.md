@@ -12,5 +12,6 @@ You can define fx 5 hours. I will then return the hour for when it's cheapest to
 - Add the template
   Change the timespanInHours and beforeHour int the template to fit your needs
 
-timespanInHours: defines how many consequently hours the price spans
+timespanInHours: defines how many consequently hours the price spans.
+
 beforeHour: defines the hour, when the charge should be finished (ex: 7 if the charge should be finished before 7:00)
