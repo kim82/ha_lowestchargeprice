@@ -1,0 +1,31 @@
+{#
+  timespanInHours: defines how many consequently hours the price spans
+  beforeHour: defines the hour, when the charge should be finished (ex: 7 if the charge should be finished before 7:00)
+#}
+{% set ns = namespace(
+  timespanInHours = 5,
+  beforeHour = 7,
+timespanPrice = 0,
+prices = state_attr("sensor.energi_data_service", "today"),
+lowestPrice = 9999,
+lowestHour = 9999) -%}
+{%- if is_state_attr("sensor.energi_data_service", "tomorrow_valid", True) -%}
+{%- set ns.prices = ns.prices + state_attr("sensor.energi_data_service", "tomorrow") -%}
+{%- endif -%}
+{%- for price in ns.prices -%}
+{%- if loop.index0 >= (as_timestamp(now()) | timestamp_custom('%H') | int) and loop.index0 < min((ns.prices | count)-4, 24+ns.beforeHour) -%}
+  {%- set ns.timespanPrice = 0 -%}
+  {% for i in range(loop.index0, loop.index0 + ns.timespanInHours) %}
+    {%- set ns.timespanPrice = ns.timespanPrice + ns.prices[i]  -%}
+  {% endfor %}
+  {%- if ns.lowestPrice > ns.timespanPrice-%}
+    {%- set ns.lowestPrice = ns.timespanPrice -%}
+    {%- if loop.index0 > 23 -%}
+      {%- set ns.lowestHour = loop.index0 - 24 -%}
+    {%- else -%}
+      {%- set ns.lowestHour = loop.index0 -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- endif -%}
+{%- endfor %}
+{{ns.lowestHour}}
